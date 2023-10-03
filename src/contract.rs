@@ -91,6 +91,28 @@ pub struct DefaultAudioDeviceSwitch {
 
 pub struct DisplayInstructions {
     pub device_list: Option<Vec<DeviceRep>>,
-    pub direction: Direction,
+    pub direction: Option<Direction>,
     pub states: Option<HashSet<State>>,
+}
+
+pub struct DisplayDevicesDetails {
+    pub input: Option<DisplayDevicesDetailsInput>,
+    pub output: Option<DisplayDevicesDetailsOutput>,
+}
+
+pub struct OutputDeviceDetails {
+    pub name: String,
+    pub state: DeviceState,
+}
+
+pub struct InputDeviceDetails {
+    pub name: String,
+    pub state: DeviceState,
+}
+pub struct DisplayDevicesDetailsInput {
+    pub devices: Vec<OutputDeviceDetails>,
+}
+
+pub struct DisplayDevicesDetailsOutput {
+    pub devices: Vec<InputDeviceDetails>,
 }
