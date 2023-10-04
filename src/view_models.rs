@@ -1,5 +1,6 @@
+use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
-use crate::models::State;
+use crate::models::{Role, State};
 
 // TODO: This module is super boilerplatey
 
@@ -37,18 +38,20 @@ impl From<wasapi::Device> for InputDeviceDetails {
 #[derive(Serialize, Deserialize)]
 pub struct DisplayDevicesDetailsInput {
     pub n: usize,
+    pub defaults: HashMap<Role, InputDeviceDetails>,
     pub devices: Vec<InputDeviceDetails>,
 }
 
 impl DisplayDevicesDetailsInput {
     // Constructor takes vec of devices
-    pub fn new(devices: Vec<InputDeviceDetails>) -> Self {
+    pub fn new(devices: Vec<InputDeviceDetails>, defaults: HashMap<Role, InputDeviceDetails>) -> Self {
         let n = devices.len();
-        DisplayDevicesDetailsInput { n, devices }
+        DisplayDevicesDetailsInput { n, devices, defaults }
     }
 }
 #[derive(Serialize, Deserialize)]
 pub struct OutputDeviceDetails {
+    pub id: String,
     pub short_name: String,
     pub long_name: String,
     pub adapter: String,
@@ -61,6 +64,7 @@ impl From<wasapi::Device> for OutputDeviceDetails {
         let short_name = device.get_friendlyname().unwrap();
         let long_name = device.get_description().unwrap();
         OutputDeviceDetails {
+            id: device.get_id().unwrap(),
             short_name: long_name,
             long_name: short_name,
             adapter: device.get_interface_friendlyname().unwrap(),

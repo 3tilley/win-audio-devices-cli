@@ -1,5 +1,5 @@
+use std::ops::Deref;
 use serde::{Deserialize, Serialize};
-use wasapi;
 use wasapi::{Device, DeviceState};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -79,6 +79,42 @@ impl Into<wasapi::DeviceState> for State {
             State::NotPresent => DeviceState::NotPresent,
             State::Unplugged => DeviceState::Unplugged,
         }
+    }
+}
+
+// Experiment with newtype
+pub struct Role(wasapi::Role);
+
+impl Serialize for Role {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let role = match self.0 {
+            wasapi::Role::Console => "Console",
+            wasapi::Role::Multimedia => "Multimedia",
+            wasapi::Role::Communications => "Communications",
+        };
+        serializer.serialize_str(role)
+    }
+}
+
+impl Deserialize<'_> for Role {
+    fn deserialize<D: serde::Deserializer>(deserializer: D) -> Result<Self, D::Error> {
+        let role = String::deserialize(deserializer)?;
+        match role.as_str() {
+            "Console" => Ok(Role(wasapi::Role::Console)),
+            "Multimedia" => Ok(Role(wasapi::Role::Multimedia)),
+            "Communications" => Ok(Role(wasapi::Role::Communications)),
+            _ => Err(serde::de::Error::custom(format!(
+                "Invalid role: {}",
+                role
+            ))),
+        }
+    }
+}
+
+impl Deref for Role {
+    type Target = wasapi::Role;
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
