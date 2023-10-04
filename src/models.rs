@@ -1,8 +1,8 @@
-use std::collections::HashSet;
+use serde::{Deserialize, Serialize};
 use wasapi;
 use wasapi::{Device, DeviceState};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum DeviceRep {
     PartialString(String),
     ExactString(String),
@@ -28,7 +28,7 @@ impl DeviceRep {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum Direction {
     Input,
     Output,
@@ -52,7 +52,7 @@ impl From<Direction> for wasapi::Direction {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub enum State {
     Active,
     Disabled,
@@ -82,37 +82,31 @@ impl Into<wasapi::DeviceState> for State {
     }
 }
 
-pub struct DefaultAudioDeviceSwitch {
-    pub device_list: Option<Vec<DeviceRep>>,
-    pub direction: Direction,
-    pub states: Option<HashSet<State>>,
-    pub dry_run: bool,
-}
 
-pub struct DisplayInstructions {
-    pub device_list: Option<Vec<DeviceRep>>,
-    pub direction: Option<Direction>,
-    pub states: Option<HashSet<State>>,
-}
-
-pub struct DisplayDevicesDetails {
-    pub input: Option<DisplayDevicesDetailsInput>,
-    pub output: Option<DisplayDevicesDetailsOutput>,
-}
-
-pub struct OutputDeviceDetails {
-    pub name: String,
-    pub state: DeviceState,
-}
-
-pub struct InputDeviceDetails {
-    pub name: String,
-    pub state: DeviceState,
-}
-pub struct DisplayDevicesDetailsInput {
-    pub devices: Vec<OutputDeviceDetails>,
-}
-
-pub struct DisplayDevicesDetailsOutput {
-    pub devices: Vec<InputDeviceDetails>,
-}
+// impl Serialize for DeviceState {
+//     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+//         let state = match self {
+//             DeviceState::Active => "Active",
+//             DeviceState::Disabled => "Disabled",
+//             DeviceState::NotPresent => "NotPresent",
+//             DeviceState::Unplugged => "Unplugged",
+//         };
+//         serializer.serialize_str(state)
+//     }
+// }
+//
+// impl Deserialize for DeviceState {
+//     fn deserialize<D: serde::Deserializer>(deserializer: D) -> Result<Self, D::Error> {
+//         let state = String::deserialize(deserializer)?;
+//         match state.as_str() {
+//             "Active" => Ok(DeviceState::Active),
+//             "Disabled" => Ok(DeviceState::Disabled),
+//             "NotPresent" => Ok(DeviceState::NotPresent),
+//             "Unplugged" => Ok(DeviceState::Unplugged),
+//             _ => Err(serde::de::Error::custom(format!(
+//                 "Invalid device state: {}",
+//                 state
+//             ))),
+//         }
+//     }
+// }

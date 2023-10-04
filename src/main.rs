@@ -1,16 +1,19 @@
-use log::{error, Level};
+use log::Level;
 use opentelemetry::KeyValue;
 use opentelemetry_appender_log::OpenTelemetryLogBridge;
 use opentelemetry_sdk::logs::{Config, LoggerProvider};
 use opentelemetry_sdk::Resource;
-use crate::contract::{DefaultAudioDeviceSwitch, Direction, DisplayInstructions};
-use crate::switcher::display_devices;
+use crate::models::Direction;
+use crate::switcher::{output_devices};
 
 use clap::Parser;
 use clap::Subcommand;
+use specs::DisplayInstructions;
 
-mod contract;
+mod models;
 mod switcher;
+mod view_models;
+mod specs;
 
 #[derive(Subcommand, Debug)]
 enum SubCommand {
@@ -48,19 +51,14 @@ fn main() {
     log::set_max_level(Level::Error.to_level_filter());
 
     wasapi::initialize_mta().unwrap();
-    let args = SubCommand::parse();
+    // let args = SubCommand::parse();
 
     let display_defaults = DisplayInstructions {
         device_list: None,
-        direction: Direction::Output,
+        direction: None,
         states: None,
     };
 
-    let input_display_defaults = DisplayInstructions {
-        device_list: None,
-        direction: Direction::Input,
-        states: None,
-    };
-    display_devices(display_defaults).unwrap();
-    display_devices(input_display_defaults).unwrap();
+    output_devices(display_defaults).unwrap();
+    // display_devices(input_display_defaults).unwrap();
 }
