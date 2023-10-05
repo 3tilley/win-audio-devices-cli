@@ -13,6 +13,7 @@ pub struct DisplayDevicesDetails {
 // TODO: Give these some better names
 #[derive(Serialize, Deserialize)]
 pub struct InputDeviceDetails {
+    pub id: String,
     pub short_name: String,
     pub long_name: String,
     pub adapter: String,
@@ -27,6 +28,7 @@ impl From<wasapi::Device> for InputDeviceDetails {
         let short_name = device.get_friendlyname().unwrap();
         let long_name = device.get_description().unwrap();
         InputDeviceDetails {
+            id: device.get_id().unwrap(),
             short_name: long_name,
             long_name: short_name,
             adapter: device.get_interface_friendlyname().unwrap(),
@@ -77,12 +79,13 @@ impl From<wasapi::Device> for OutputDeviceDetails {
 #[derive(Serialize, Deserialize)]
 pub struct DisplayDevicesDetailsOutput {
     pub n: usize,
+    pub defaults: HashMap<Role, OutputDeviceDetails>,
     pub devices: Vec<OutputDeviceDetails>,
 }
 impl DisplayDevicesDetailsOutput {
     // Constructor takes vec of devices
-    pub fn new(devices: Vec<OutputDeviceDetails>) -> Self {
+    pub fn new(devices: Vec<OutputDeviceDetails>, defaults: HashMap<Role, OutputDeviceDetails>) -> Self {
         let n = devices.len();
-        DisplayDevicesDetailsOutput { n, devices }
+        DisplayDevicesDetailsOutput { n, devices, defaults }
     }
 }

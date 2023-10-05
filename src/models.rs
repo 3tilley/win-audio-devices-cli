@@ -1,3 +1,4 @@
+use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 use serde::{Deserialize, Serialize};
 use wasapi::{Device, DeviceState};
@@ -83,7 +84,15 @@ impl Into<wasapi::DeviceState> for State {
 }
 
 // Experiment with newtype
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Role(wasapi::Role);
+
+// TODO: Review this or put the Hash up in the level above
+impl Hash for Role {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        state.write_u8(self.0 as u8)
+    }
+}
 
 impl Serialize for Role {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
@@ -96,8 +105,9 @@ impl Serialize for Role {
     }
 }
 
-impl Deserialize<'_> for Role {
-    fn deserialize<D: serde::Deserializer>(deserializer: D) -> Result<Self, D::Error> {
+impl<'de> Deserialize<'de> for Role {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where D: serde::Deserializer<'de> {
         let role = String::deserialize(deserializer)?;
         match role.as_str() {
             "Console" => Ok(Role(wasapi::Role::Console)),
@@ -115,6 +125,13 @@ impl Deref for Role {
     type Target = wasapi::Role;
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+// It's either this or make the field pub crate. I think this is better?
+impl From<wasapi::Role> for Role {
+    fn from(role: wasapi::Role) -> Self {
+        Role(role)
     }
 }
 

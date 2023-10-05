@@ -35,13 +35,13 @@ pub fn read_devices(instructions: DisplayInstructions) -> Result<DisplayDevicesD
             .filter_map(|device| device.ok())
             .collect::<Vec<_>>();
         let devices = filter_devices(dev_2, &instructions.states, &instructions.device_list);
-        let defaults = [Role::Console, Role::Multimedia, Role::Communications]
-            .iter()
+        let defaults = [wasapi::Role::Console , wasapi::Role::Multimedia, wasapi::Role::Communications]
+            .into_iter()
             .map(|role| {
-                let device = get_default_device_for_role(&d.into(), role).unwrap();
-                (role.clone(), device.into())
+                let device = get_default_device_for_role(&d.into(), &role).unwrap();
+                (role.into(), device.into())
             })
-            .collect::<HashMap<_, _>>();
+            .collect::<HashMap<Role, _>>();
         DisplayDevicesDetailsInput::new(devices.into_iter().map(|d| d.into()).collect::<Vec<_>>(), defaults)
     });
 
@@ -52,7 +52,14 @@ pub fn read_devices(instructions: DisplayInstructions) -> Result<DisplayDevicesD
             .filter_map(|device| device.ok())
             .collect::<Vec<_>>();
         let devices = filter_devices(dev_2, &instructions.states, &instructions.device_list);
-        DisplayDevicesDetailsOutput::new(devices.into_iter().map(|d| d.into()).collect::<Vec<_>>())
+        let defaults = [wasapi::Role::Console , wasapi::Role::Multimedia, wasapi::Role::Communications]
+            .into_iter()
+            .map(|role| {
+                let device = get_default_device_for_role(&d.into(), &role).unwrap();
+                (role.into(), device.into())
+            })
+            .collect::<HashMap<Role, _>>();
+        DisplayDevicesDetailsOutput::new(devices.into_iter().map(|d| d.into()).collect::<Vec<_>>(), defaults)
     });
 
     // // 2. Get the default device

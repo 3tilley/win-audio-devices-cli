@@ -23,6 +23,8 @@ enum SubCommand {
         input: bool,
         #[clap(long, short, action)]
         output: bool,
+        #[clap(long, short, action)]
+        json: bool,
     },
     /// Switch default audio device
     Switch {
@@ -57,8 +59,8 @@ fn main() {
         device_list: None,
         direction: None,
         states: None,
+        json: true,
     };
 
     output_devices(display_defaults).unwrap();
-    // display_devices(input_display_defaults).unwrap();
 }
