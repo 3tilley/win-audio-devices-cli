@@ -27,16 +27,15 @@ For obvious reasons, in its current state this won't work outside Windows, but
 if it's useful and a common set of interfaces can be found, it could be
 
 Goals:
-- [x] Output system info in JSON
-- [] Pretty print info to terminal
-- [] Set default devices
-- [] Set default devices interactively
-- [] Play sounds to quickly identify devices
-- [] Mute or unmute microphones
+[x] Output system info in JSON
+[] Pretty print info to terminal
+[] Set default devices
+[] Set default devices interactively
+[] Play sounds to quickly identify devices
+[] Mute or unmute microphones
 
-Unlikely to be implemented:
+Since they are already trivially accessible from the keyboard
+the following are unikely to be implemented:
 * Change volume
 * Mute speakers
 * Media controls
-
-For the simple reason that these are already easily accessible from the keyboard
