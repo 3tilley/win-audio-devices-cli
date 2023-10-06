@@ -15,8 +15,17 @@ mod switcher;
 mod view_models;
 mod specs;
 
+#[derive(Parser)]
+#[command(arg_required_else_help = true)]
+struct Cli {
+    #[command(subcommand)]
+    command: Command,
+    #[command(flatten)]
+    verbose: clap_verbosity_flag::Verbosity,
+}
+
 #[derive(Subcommand, Debug)]
-enum SubCommand {
+enum Command {
     /// List audio devices
     List {
         #[clap(long, short, action)]
@@ -53,14 +62,21 @@ fn main() {
     log::set_max_level(Level::Error.to_level_filter());
 
     wasapi::initialize_mta().unwrap();
-    // let args = SubCommand::parse();
+    let args = Cli::parse();
 
-    let display_defaults = DisplayInstructions {
-        device_list: None,
-        direction: None,
-        states: None,
-        json: true,
-    };
+    match &args.command {
+        Command::List { input, output, json } => {
+            let display_defaults = DisplayInstructions {
+                device_list: None,
+                direction: None,
+                states: None,
+                json: *json,
+            };
+            output_devices(display_defaults).unwrap();
+        }
+        Command::Switch {} => {
+            println!("Switching")
+        }
+    }
 
-    output_devices(display_defaults).unwrap();
 }

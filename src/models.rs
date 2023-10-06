@@ -1,5 +1,6 @@
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
+use log::{info, trace};
 use serde::{Deserialize, Serialize};
 use wasapi::{Device, DeviceState};
 
@@ -15,15 +16,33 @@ impl DeviceRep {
         match self {
             DeviceRep::PartialString(s) => {
                 let name = device.get_friendlyname().unwrap().to_lowercase();
-                name.contains(&s.to_lowercase())
+                let result = name.contains(&s.to_lowercase());
+                if result {
+                    info!("Matched {} via PartialString", name);
+                } else {
+                    trace!("No match for {} via PartialString", name);
+                }
+                result
             }
             DeviceRep::ExactString(s) => {
                 let name = device.get_friendlyname().unwrap();
-                name == *s
+                let result = name == *s;
+                if result {
+                    info!("Matched {} via ExactString", name);
+                } else {
+                    trace!("No match for {} via ExactString", name);
+                }
+                result
             }
             DeviceRep::DeviceId(s) => {
                 let id = device.get_id().unwrap();
-                id == *s
+                let result = id == *s;
+                if result {
+                    info!("Matched {} via DeviceId", id);
+                } else {
+                    trace!("No match for {} via DeviceId", id);
+                }
+                result
             }
         }
     }

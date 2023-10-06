@@ -1,5 +1,6 @@
 use crate::models::{DeviceRep, Direction, Role, State};
 use std::collections::{HashMap, HashSet};
+use log::{info, trace};
 use wasapi::{Device, DeviceCollection, get_default_device, get_default_device_for_role};
 use crate::specs::{DefaultAudioDeviceSwitch, DisplayInstructions};
 use crate::view_models::{DisplayDevicesDetails, DisplayDevicesDetailsInput, DisplayDevicesDetailsOutput, InputDeviceDetails};
@@ -30,10 +31,12 @@ pub fn read_devices(instructions: DisplayInstructions) -> Result<DisplayDevicesD
         };
     let input_devices = input_direction.map(|d| {
         let device_collection = DeviceCollection::new(&(d.into())).unwrap();
+        info!("{} devices found", device_collection.get_nbr_devices().unwrap());
         let dev_2 = device_collection
             .into_iter()
             .filter_map(|device| device.ok())
             .collect::<Vec<_>>();
+        trace!("{} devices found without errors", dev_2.len());
         let devices = filter_devices(dev_2, &instructions.states, &instructions.device_list);
         let defaults = [wasapi::Role::Console , wasapi::Role::Multimedia, wasapi::Role::Communications]
             .into_iter()
@@ -47,10 +50,12 @@ pub fn read_devices(instructions: DisplayInstructions) -> Result<DisplayDevicesD
 
     let output_devices = output_direction.map(|d| {
         let device_collection= DeviceCollection::new(&(d.into())).unwrap();
+        info!("{} devices found", device_collection.get_nbr_devices().unwrap());
         let dev_2 = device_collection
             .into_iter()
             .filter_map(|device| device.ok())
             .collect::<Vec<_>>();
+        trace!("{} devices found without errors", dev_2.len());
         let devices = filter_devices(dev_2, &instructions.states, &instructions.device_list);
         let defaults = [wasapi::Role::Console , wasapi::Role::Multimedia, wasapi::Role::Communications]
             .into_iter()
@@ -62,20 +67,6 @@ pub fn read_devices(instructions: DisplayInstructions) -> Result<DisplayDevicesD
         DisplayDevicesDetailsOutput::new(devices.into_iter().map(|d| d.into()).collect::<Vec<_>>(), defaults)
     });
 
-    // // 2. Get the default device
-    // let default = get_default_device(&instructions.direction.into()).unwrap();
-    //
-    // println!("Found the following {:?} devices:", instructions.direction);
-    // for device in &device_list {
-    //     let state = &device.get_state_enum().unwrap();
-    //     if device.get_id().unwrap() == default.get_id().unwrap() {
-    //         println!("*** {:?}. State: {:?} ***", device.get_friendlyname().unwrap(), state);
-    //     } else {
-    //         println!("{:?}. State: {:?}", device.get_friendlyname().unwrap(), state);
-    //     }
-    // }
-    //
-    // Ok(())
     Ok(DisplayDevicesDetails {
         input: input_devices,
         output: output_devices,
@@ -99,9 +90,11 @@ pub fn filter_devices(
                 }
             }
             //devices.append(device_list.drain(device_i).collect());
+            info!("Removing {} devices for not matching the criteria", &device_i.len());
             device_i.iter().map(|i| device_list.remove(*i)).for_each(|d| devices.push(d));
         }
         None => {
+            info!("No devices filtered by name");
             for device in device_list {
                 devices.push(device);
             }
