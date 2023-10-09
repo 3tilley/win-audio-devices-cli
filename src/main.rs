@@ -3,11 +3,12 @@ use opentelemetry::KeyValue;
 use opentelemetry_appender_log::OpenTelemetryLogBridge;
 use opentelemetry_sdk::logs::{Config, LoggerProvider};
 use opentelemetry_sdk::Resource;
-use crate::models::Direction;
+use crate::models::{DeviceRep, Direction};
 use crate::switcher::{output_devices};
 
 use clap::Parser;
 use clap::Subcommand;
+use opentelemetry::trace::FutureExt;
 use specs::DisplayInstructions;
 
 mod models;
@@ -34,6 +35,13 @@ enum Command {
         output: bool,
         #[clap(long, short, action)]
         json: bool,
+        // TODO: Work out short codes
+        #[clap(long, action)]
+        device_id: Option<Vec<String>>,
+        #[clap(long, action)]
+        device_name: Option<Vec<String>>,
+        #[clap(long, action)]
+        device_partial: Option<Vec<String>>,
     },
     /// Switch default audio device
     Switch {
@@ -65,9 +73,20 @@ fn main() {
     let args = Cli::parse();
 
     match &args.command {
-        Command::List { input, output, json } => {
+        Command::List { input, output, json, device_id, device_name, device_partial } => {
+            println!("Listing devices {:?}", device_id);
+            // let ids = if device_id.unwrap().len() > 0 {
+            //     Some(device_id.into_iter().map(|s| DeviceRep::DeviceId(s.to_string())).collect::<Vec<_>>())
+            // } else {
+            //     None
+            // };
+            let ids = if device_id.is_some() {
+                Some(device_id.clone().unwrap().into_iter().map(|s| DeviceRep::DeviceId(s.to_string())).collect::<Vec<_>>())
+            } else {
+                None
+            };
             let display_defaults = DisplayInstructions {
-                device_list: None,
+                device_list: ids,
                 direction: None,
                 states: None,
                 json: *json,
