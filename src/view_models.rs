@@ -1,3 +1,7 @@
+//! # View Models
+//!
+//! The structs in here are for rendering the output of commands, either with a pretty printer
+//! or as JSON depending on how the command is invoked
 use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 use crate::models::{Role, State};

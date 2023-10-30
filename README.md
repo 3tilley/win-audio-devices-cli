@@ -6,8 +6,6 @@
 
 ## Installation
 
-⛔ Awaiting PR in upstream crate ⛔
-
 The command below will install a bin called `wadc` in your `~/.cargo/bin` directory.
 
 `cargo install win-audio-devices-cli`

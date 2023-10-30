@@ -5,7 +5,8 @@ use wasapi::{Device, DeviceCollection, get_default_device, get_default_device_fo
 use crate::specs::{DefaultAudioDeviceSwitch, DisplayInstructions};
 use crate::view_models::{DisplayDevicesDetails, DisplayDevicesDetailsInput, DisplayDevicesDetailsOutput, InputDeviceDetails};
 
-pub fn switch_default_device(instructions: DefaultAudioDeviceSwitch) -> Result<State, ()> {
+// TODO, this requires pulling in the COM Policy crate and handling the unsafe code
+fn switch_default_device(instructions: DefaultAudioDeviceSwitch) -> Result<State, ()> {
     // 1. Get the current device
     let current = get_default_device(&instructions.direction.into()).unwrap();
 
@@ -21,6 +22,7 @@ pub fn output_devices(instructions: DisplayInstructions) -> Result<(), ()> {
     Ok(())
 }
 
+/// Call wasapi to get the devices on the system
 pub fn read_devices(instructions: DisplayInstructions) -> Result<DisplayDevicesDetails, ()> {
     // 1. Which directions are required
     let (input_direction, output_direction) =
@@ -73,6 +75,9 @@ pub fn read_devices(instructions: DisplayInstructions) -> Result<DisplayDevicesD
     })
 }
 
+/// Take a list of devices and filter them by state, and by a matching spec. If provided, the output
+/// will always be in the order that they appear in the matching spec, to allow consistent ordering
+/// regardless of how wasapi gives them
 pub fn filter_devices(
     mut device_list: Vec<Device>,
     states: &Option<HashSet<State>>,
@@ -120,46 +125,3 @@ pub fn filter_devices(
 
     devices
 }
-// pub fn filter_devices<'a>(
-//     device_list: &[&'a Device],
-//     //device_list: impl IntoIterator<Item = &'a Device>,
-//     states: Option<HashSet<State>>,
-//     device_matcher: Option<Vec<DeviceRep>>,
-// ) -> Vec<&'a Device> {
-//     let mut devices = Vec::new();
-//     match device_matcher {
-//         Some(matcher) => {
-//             for dev_match in matcher {
-//                 for &device in device_list {
-//                     if dev_match.check_match(&device) {
-//                         devices.push(device);
-//                     }
-//                 }
-//             }
-//         }
-//         None => {
-//             for &device in device_list {
-//                 devices.push(device);
-//             }
-//         }
-//     }
-//
-//     match states {
-//         Some(states) => {
-//             devices = devices
-//                 .into_iter()
-//                 .filter_map(|device| {
-//                     let state = device.get_state().unwrap();
-//                     if states.contains(&state.into()) {
-//                         Some(device)
-//                     } else {
-//                         None
-//                     }
-//                 })
-//                 .collect::<Vec<_>>()
-//         }
-//         None => (),
-//     }
-//
-//     devices
-// }

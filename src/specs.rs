@@ -1,3 +1,7 @@
+//! Specifications
+//!
+//! These are the instructions for how to process various commands. They are generally built from
+//! the union of the command line args and anything read out of config
 use std::collections::HashSet;
 use crate::models::{DeviceRep, Direction, State};
 

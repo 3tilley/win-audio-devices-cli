@@ -17,7 +17,7 @@ mod view_models;
 mod specs;
 
 #[derive(Parser)]
-#[command(arg_required_else_help = true)]
+#[command(arg_required_else_help = true, author, version, about)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -75,11 +75,6 @@ fn main() {
     match &args.command {
         Command::List { input, output, json, device_id, device_name, device_partial } => {
             println!("Listing devices {:?}", device_id);
-            // let ids = if device_id.unwrap().len() > 0 {
-            //     Some(device_id.into_iter().map(|s| DeviceRep::DeviceId(s.to_string())).collect::<Vec<_>>())
-            // } else {
-            //     None
-            // };
             let ids = if device_id.is_some() {
                 Some(device_id.clone().unwrap().into_iter().map(|s| DeviceRep::DeviceId(s.to_string())).collect::<Vec<_>>())
             } else {
